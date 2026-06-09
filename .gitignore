@@ -3,3 +3,10 @@
 ################################################################################
 
 /.vs/ProjectEvaluation/securecatalog.metadata.v10.bin
+
+
+.vs/
+bin/
+obj/
+*.user
+*.suo

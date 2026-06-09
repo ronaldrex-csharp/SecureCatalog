@@ -1,0 +1,48 @@
+﻿@using SecureCatalog.Models
+@using SecureCatalog.Services
+@implements IDisposable
+@inject ToastService ToastService
+
+@if (toast is not null)
+{
+    <div style="
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        z-index: 9999;">
+
+        <div class="@AlertClass">
+            @toast.Message
+        </div>
+    </div>
+}
+
+@code {
+    private ToastMessage? toast;
+
+    private string AlertClass =>
+        toast?.Type == "error"
+            ? "alert alert-danger shadow"
+            : "alert alert-success shadow";
+
+    protected override void OnInitialized()
+    {
+        ToastService.OnShow += ShowToast;
+    }
+
+    private async void ShowToast(ToastMessage message)
+    {
+        toast = message;
+        await InvokeAsync(StateHasChanged);
+
+        await Task.Delay(3000);
+
+        toast = null;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        ToastService.OnShow -= ShowToast;
+    }
+}

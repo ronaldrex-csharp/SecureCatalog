@@ -1,0 +1,38 @@
+﻿@typeparam TItem
+
+@if (Items is null)
+{
+    <div class="alert alert-info">
+        Loading...
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var item in Items)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        @ItemTemplate(item)
+                    </div>
+
+                    <div class="card-footer bg-white border-0 d-flex gap-2">
+                        @ActionTemplate(item)
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter]
+    public IEnumerable<TItem>? Items { get; set; }
+
+    [Parameter]
+    public RenderFragment<TItem> ItemTemplate { get; set; } = default!;
+
+    [Parameter]
+    public RenderFragment<TItem> ActionTemplate { get; set; } = default!;
+}

@@ -1,0 +1,86 @@
+﻿@using SecureCatalog.Models
+@using Microsoft.AspNetCore.Components.Forms
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+
+                <h3 class="card-title mb-4 text-center">
+                    @(Product.Id == 0 ? "Add Product" : "Edit Product")
+                </h3>
+
+                <EditForm EditContext="editContext" OnValidSubmit="HandleSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <div class="mb-3">
+                        <label class="form-label">Product Name</label>
+                        <InputText @bind-Value="Product.Name"
+                                   class="form-control" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Price</label>
+                        <InputNumber @bind-Value="Product.Price"
+                                     class="form-control" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Stock</label>
+                        <InputNumber @bind-Value="Product.Stock"
+                                     class="form-control" />
+                    </div>
+
+                    <div class="mt-3 d-flex justify-content-center gap-2">
+                        <button type="submit"
+                                class="btn btn-primary px-4">
+                            @(Product.Id == 0 ? "Save Product" : "Update Product")
+                        </button>
+
+                        <button type="button"
+                                class="btn btn-secondary px-4"
+                                formnovalidate
+                                @onclick:preventDefault="true"
+                                @onclick="CancelEdit">
+                            @(Product.Id == 0 ? "Clear" : "Cancel")
+                        </button>
+                    </div>
+                </EditForm>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+@code {
+    private EditContext? editContext;
+
+    protected override void OnParametersSet()
+    {
+        editContext = new EditContext(Product);
+    }
+
+    [Parameter]
+    public Product Product { get; set; } = new();
+
+    private List<string> apiValidationErrors = new();
+
+    [Parameter]
+    public EventCallback<Product> OnSubmit { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancelEdit { get; set; }
+
+    private async Task HandleSubmit()
+    {
+        await OnSubmit.InvokeAsync(Product);
+    }
+
+    private async Task CancelEdit()
+    {
+        await OnCancelEdit.InvokeAsync();
+    }
+ 
+}

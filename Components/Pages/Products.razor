@@ -1,0 +1,183 @@
+﻿@page "/products"
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Authorization
+@using SecureCatalog.Components.Common
+@using SecureCatalog.Models
+@using SecureCatalog.Services
+@using SecureCatalog.Exceptions
+@inject ApiClient ApiClient
+@inject ToastService ToastService
+
+<div class="position-relative">
+
+    @if (apiValidationErrors.Any())
+    {
+        <div class="alert alert-danger shadow position-absolute w-100"
+             style="top:-40px; left: 0; z-index: 10;">
+            <ul class="mb-0">
+                @foreach (var error in apiValidationErrors)
+                {
+                    <li>@error</li>
+                }
+            </ul>
+        </div>
+    } 
+</div>
+
+
+
+
+<div class="container py-4">
+
+   
+
+<Productform Product="currentProduct"
+           
+             OnSubmit="SaveProduct"
+             OnCancelEdit="CancelEdit" />
+
+    <ConfirmDeleteModal IsVisible="showDeleteModal"
+                        ItemName="@productToDelete?.Name"
+                        OnConfirm="ConfirmDelete"
+                        OnCancel="CancelDelete" />
+
+  
+             
+  <EntityList TItem="Product" Items="products">
+
+    <ItemTemplate Context="product">
+        <h5 class="card-title">@product.Name</h5>
+
+        <p class="card-text mb-2">
+            <strong>Price:</strong> $@product.Price
+        </p>
+
+        <p class="card-text text-muted mb-4">
+            Stock: @product.Stock
+        </p>
+    </ItemTemplate>
+
+    <ActionTemplate Context="product">
+        <button class="btn btn-sm btn-outline-primary"
+                @onclick="() => EditProduct(product)">
+            Edit
+        </button>
+
+        <button class="btn btn-sm btn-outline-danger"
+                  @onclick="() => AskDelete(product)">
+            Delete
+        </button>
+    </ActionTemplate>
+
+</EntityList>
+
+</div>
+
+
+
+@code {
+    private List<Product>? products;
+    private Product currentProduct = new();
+    private List<string> apiValidationErrors = new();
+    private bool showDeleteModal;
+    private Product? productToDelete;
+   
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProducts();
+    }
+
+    private async Task LoadProducts()
+    {
+        products = await ApiClient.GetProductsAsync();
+    }
+
+    private async Task SaveProduct(Product product)
+    {
+        apiValidationErrors.Clear();
+         try
+         {
+            if (product.Id == 0)
+            {
+                await ApiClient.CreateProductAsync(new CreateProductRequest
+                {
+                    Name = product.Name,
+                    Price = product.Price,
+                    Stock = product.Stock
+                });
+
+                ToastService.ShowToast("Product created successfully", "success");
+            }
+            else
+            {
+                await ApiClient.UpdateProductAsync(product);
+
+                ToastService.ShowToast("Product updated successfully", "success");
+            }
+
+            products = await ApiClient.GetProductsAsync();
+            currentProduct = new Product();
+        }
+        catch (ApiValidationException ex)
+        {
+            apiValidationErrors = ex.Errors;
+        }
+    }
+
+   
+    private void EditProduct(Product product)
+    {
+        currentProduct = new Product
+        {
+            Id = product.Id,
+            Name = product.Name,
+            Price = product.Price,
+            Stock = product.Stock
+        };
+    }
+    private async Task DeleteProduct(int id)
+    {
+        await ApiClient.DeleteProductAsync(id);
+
+        if (currentProduct.Id == id)
+        {
+            currentProduct = new Product();
+        }
+
+        await LoadProducts();
+    }
+    private void CancelEdit()
+    {
+        currentProduct = new Product();
+    }
+
+   
+
+    private void AskDelete(Product product)
+    {
+        productToDelete = product;
+        showDeleteModal = true;
+    }
+
+    private async Task ConfirmDelete()
+    {
+        if (productToDelete is null)
+            return;
+
+        await ApiClient.DeleteProductAsync(productToDelete.Id);
+
+        ToastService.ShowToast("Product deleted successfully", "success");
+
+        products = await ApiClient.GetProductsAsync();
+
+        productToDelete = null;
+        showDeleteModal = false;
+    }
+
+    private void CancelDelete()
+    {
+        productToDelete = null;
+        showDeleteModal = false;
+    }
+}
