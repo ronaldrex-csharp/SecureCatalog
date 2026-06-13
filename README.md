@@ -85,12 +85,10 @@ Example API validation:
 
 ## Architecture
 
-The application uses ASP.NET Core Identity with Entity Framework Core for authentication and user management.
+## Architecture
+The backend is implemented as an ASP.NET Core Minimal API using CQRS and MediatR. Product operations are handled through commands and queries, with Dapper providing lightweight data access to a SQLite database. FluentValidation is used to enforce business rules and input validation.
 
-Product operations are handled through a separate API using CQRS, MediatR, FluentValidation, Dapper, and SQLite.
-
-The Blazor UI communicates with the API through an injected ApiClient service.
-The API uses CQRS and MediatR to separate commands and queries while Dapper is used for lightweight data access.
+Authentication and user management are implemented using ASP.NET Core Identity and Entity Framework Core.
 
 ## Running Locally
 
