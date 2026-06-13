@@ -41,6 +41,7 @@ The application is deployed to Microsoft Azure App Service.
 
 - ASP.NET Core Identity authentication
 - User registration and login
+- ASP.NET Core Minimal API
 - Protected pages with authorization
 - Entity Framework Core for Identity data
 - SQLite database
@@ -49,7 +50,6 @@ The application is deployed to Microsoft Azure App Service.
 - Soft delete support
 - CQRS architecture using MediatR
 - Dapper data access for product operations
-- REST API backend
 - Blazor frontend
 - Serilog structured logging
 - Client-side form validation
